@@ -16,19 +16,44 @@ sales_df2 = sales_df.filter(regex='Victoria')
 
 date = sales_df['Unnamed: 0'].copy().rename("Date")
 sales_df2 = sales_df2.join(date)
-# for key, value in sales_df2.iteritems():
-#     print(key)
-#     # get data of june 2013 - feb 2021
-#     plt.scatter(sales_df2["Date"][-92:], sales_df2[key][-92:]);
-#     plt.show()
-#     # print(value)
-#     # print()
+month = sales_df2['Date'].str[0:3]
+
+sales_df2.pop("Date")
+sales_df2 = sales_df2.replace(to_replace=r',', value='.', regex=True)
+
+cols = sales_df2.columns[sales_df2.dtypes.eq('object')]
+sales_df2[cols] = sales_df2[cols].apply(pd.to_numeric, errors='coerce', axis=1)
+sales_df2["month"] = month
+grouped_sales = sales_df2.groupby(["month"]).mean().reset_index()
+
+# grouped_sales['month'] = pd.to_datetime(grouped_sales['month'], format='%b').month
+# grouped_sales.sort_values(by='month', inplace=True)
+# print(grouped_sales['month'])
+
+for key in cols:
+    plt.scatter(grouped_sales['month'], grouped_sales[key]);
+    plt.title(key)
+    plt.ylabel(key)
+    plt.xlabel("month")
+    plt.show()
+
 
 online_sales_df = online_sales_df.drop([0,1,2,3,4,5,6,7,8], axis=0)
-for key, value in online_sales_df.iteritems():
-    print(key)
-    # # get data of june 2013 - feb 2021
-    plt.scatter(online_sales_df['Unnamed: 0'], online_sales_df[key]);
+date = online_sales_df['Unnamed: 0'].copy().rename("Date")
+online_sales_df2 = online_sales_df.join(date)
+month = online_sales_df2['Date'].str[0:3]
+
+online_sales_df2.pop("Date")
+online_sales_df2.pop('Unnamed: 0')
+online_sales_df2 = online_sales_df2.replace(to_replace=r',', value='.', regex=True)
+cols2 = online_sales_df2.columns[online_sales_df2.dtypes.eq('object')]
+online_sales_df2[cols2] = online_sales_df2[cols2].apply(pd.to_numeric, errors='coerce', axis=1)
+online_sales_df2["month"] = month
+online_grouped_sales = online_sales_df2.groupby(["month"]).mean().reset_index()
+
+for key in cols2:
+    plt.scatter(online_grouped_sales['month'], online_grouped_sales[key]);
+    plt.title(key)
+    plt.ylabel(key)
+    plt.xlabel("month")
     plt.show()
-    print(value)
-    # print()
