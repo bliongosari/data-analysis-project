@@ -22,7 +22,6 @@ sales_df2["month"] = month
 grouped_sales = sales_df2.groupby(["month"]).mean().reset_index()
 grouped_sales["month_int"] = pd.to_datetime(grouped_sales.month, format='%b', errors='coerce').dt.month
 grouped_sales = grouped_sales.sort_values(by="month_int")
-print(grouped_sales)
 # for key in cols:
 #     plt.scatter(grouped_sales['month'], grouped_sales[key]);
 #     plt.title(key)
@@ -30,9 +29,56 @@ print(grouped_sales)
 #     plt.xlabel("month")
 #     plt.show()
 
-mean_max_temp = climate_data.loc[0]
-mean_min_temp = climate_data.loc[10]
-mean_rainfall = climate_data.loc[23]
+
+
+climate_data = climate_data.drop(['Annual', 'Number of Years', 'Start Year', 'End Year', 'Statistic Element'], axis=1)
+mean_max_temp = pd.Series(climate_data.loc[0], name ="min_temp")
+mean_min_temp = pd.Series(climate_data.loc[10], name ="max_temp")
+mean_rainfall =  pd.Series(climate_data.loc[23], name ="rainfall")
+
+df = pd.concat([mean_max_temp, mean_min_temp, mean_rainfall], axis = 1)
+
+# print(grouped_sales)
+# print(a)
+df = df.reset_index()
+grouped_sales = grouped_sales.reset_index()
+
+result = pd.concat([grouped_sales, df], axis=1)
+result = result.drop(['index', 'month'], axis = 1)
+
+obj = result.columns[result.dtypes.eq('object')]
+result[obj] = result[obj].apply(pd.to_numeric, errors='coerce', axis=1)
+
+# change to max_temp or rainfall to test
+variable = "min_temp"
+
+# remove december (comment out if want to include outlier)
+# result = result[:11]
+
+result = result.sort_values(by=variable)
+temp = result[variable]
+
+count = 0
+for key in cols:
+    r_value = str(temp.corr(result[key]))
+    plt.scatter(result[variable], result[key]);
+    plt.xlabel(variable)
+    plt.ylabel(key)
+    plt.title(key[24:-2] + " vs " + variable)
+    plt.suptitle("Correlation = " + r_value)
+    plt.savefig(key[24:-2])
+    plt.clf()
+
+
+
+
+
+
+
+
+
+
+
 
 
 # online_sales_df = online_sales_df.drop([0,1,2,3,4,5,6,7,8], axis=0)
