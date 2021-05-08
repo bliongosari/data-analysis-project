@@ -29,17 +29,12 @@ grouped_sales = grouped_sales.sort_values(by="month_int")
 #     plt.xlabel("month")
 #     plt.show()
 
-
-
 climate_data = climate_data.drop(['Annual', 'Number of Years', 'Start Year', 'End Year', 'Statistic Element'], axis=1)
 mean_max_temp = pd.Series(climate_data.loc[0], name ="min_temp")
 mean_min_temp = pd.Series(climate_data.loc[10], name ="max_temp")
-mean_rainfall =  pd.Series(climate_data.loc[23], name ="rainfall")
+mean_rainfall = pd.Series(climate_data.loc[23], name ="rainfall")
 
 df = pd.concat([mean_max_temp, mean_min_temp, mean_rainfall], axis = 1)
-
-# print(grouped_sales)
-# print(a)
 df = df.reset_index()
 grouped_sales = grouped_sales.reset_index()
 
@@ -58,7 +53,6 @@ variable = "min_temp"
 result = result.sort_values(by=variable)
 temp = result[variable]
 
-count = 0
 for key in cols:
     r_value = str(temp.corr(result[key]))
     plt.scatter(result[variable], result[key]);
@@ -68,6 +62,11 @@ for key in cols:
     plt.suptitle("Correlation = " + r_value)
     plt.savefig(key[24:-2])
     plt.clf()
+
+
+
+
+
 
 
 
