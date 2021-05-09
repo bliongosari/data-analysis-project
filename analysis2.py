@@ -40,18 +40,23 @@ def get_correlation_with_sales(variable, sales_df, variable_name):
     sales_df["inflation_price"] = inflation_price
     base_value = inflation.loc[inflation['year'] == year_start]['amount'].values[0]
     sales_df["multiplier"] = sales_df["inflation_price"]/base_value
-    variable = sales_df[variable_name]
 
-    # for key in keys[:-1]:
-    #     r_value = str(variable.corr(sales_df[key]/sales_df['multiplier']))
-    #     plt.scatter(variable, sales_df[key]);
-    #     plt.xlabel(variable_name)
-    #     plt.ylabel(key)
-    #     plt.title(key[24:-2] + " vs " + variable_name)
-    #     plt.suptitle("Correlation = " + r_value)
-    #     plt.show()
-    #     # plt.savefig(key[24:-2])
-    #     plt.clf()
+    # adjust for inflation
+    for key in keys[:-1]:
+        sales_df[key] = sales_df[key]/sales_df['multiplier']
+
+    variable = sales_df[variable_name]
+    # print(sales_df)
+    for key in keys[:-1]:
+        r_value = str(variable.corr(sales_df[key]))
+        plt.scatter(variable, sales_df[key]);
+        plt.xlabel(variable_name)
+        plt.ylabel(key)
+        plt.title(key[24:-2] + " vs " + variable_name)
+        plt.suptitle("Correlation = " + r_value)
+        plt.show()
+        # plt.savefig(key[24:-2])
+        plt.clf()
 
 
 if __name__ == '__main__':
