@@ -1,12 +1,13 @@
+import math
 import pandas as pd
 import numpy as np
+from scipy import stats
 import matplotlib.pyplot as plt
 from sklearn.metrics.cluster import normalized_mutual_info_score
 
 def get_correlation_with_sales(variable, sales_df, variable_name):
     variable = variable.transpose()
     variable = variable.iloc[2:-1]
-
 
     # make start year 1983
     cols = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
@@ -47,20 +48,27 @@ def get_correlation_with_sales(variable, sales_df, variable_name):
     # adjust for inflation
     for key in keys[:-1]:
         sales_df[key] = sales_df[key]/sales_df['multiplier']
-    # remove december
-    # sales_df = sales_df[sales_df["Date"].str[0:3] != "Dec"]
+
+    # removing outliers
+    #
+    sales_df = sales_df.iloc[:, :-3];
+    objects = sales_df.columns[sales_df.dtypes.eq('object')]
+    sales_df = sales_df.drop(objects, axis = 1)
+    sales_df = sales_df[(np.abs(stats.zscore(sales_df)) < 3).all(axis=1)]
     variable = sales_df[variable_name]
+    bins = 1 + math.log(len(sales_df), 2);
+
     for key in keys[:-1]:
         r_value = str(variable.corr(sales_df[key]))
         plt.scatter(variable, sales_df[key])
-        variable2 = pd.cut(variable, 4)
-        sales_df[key] = pd.cut(sales_df[key], bins=10)
+        variable2 = pd.cut(variable, bins=round(bins))
+        sales_df[key] = pd.cut(sales_df[key], bins=round(bins))
         mi = normalized_mutual_info_score(variable2, sales_df[key])
         plt.xlabel(variable_name)
         plt.ylabel(key[24:-2])
         plt.title(key[24:-2] + " vs " + variable_name + "\nCorrelation = " + r_value + "\n" + "MI = " + str(mi), fontsize = 12)
-        # plt.savefig(key[24:-2])
-        plt.show()
+        plt.savefig(key[24:-2])
+        # plt.show()
         plt.clf()
 
 
@@ -71,14 +79,17 @@ if __name__ == '__main__':
     rainfall_monthly_original = pd.read_csv('monthly_rainfall.csv', encoding='ISO-8859-1')
 
     sales_df = pd.read_csv('sales-per-month-edited.csv', sep=';')
-    # sales_df = pd.read_csv('seasonally-adjusted-sales.csv', sep=';')
+    sales_df = pd.read_csv('seasonally-adjusted-sales.csv', sep=';')
     inflation = pd.read_csv('inflation_data.csv', encoding='ISO-8859-1')
 
-    sales_df = sales_df.drop([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,474,475], axis=0)
+    # original
+    # sales_df = sales_df.drop([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 474, 475], axis=0)
+    # adjusted sales
+    sales_df = sales_df.drop([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,474,475,476], axis=0)
     sales_df2 = sales_df.filter(regex='Victoria')
 
     date = sales_df['Unnamed: 0'].copy().rename("Date")
     sales_df2 = sales_df2.join(date)
-    get_correlation_with_sales(max_temp_monthly_original, sales_df2, "max_temp")
-    get_correlation_with_sales(min_temp_monthly_original, sales_df2, "min_temp")
+    # get_correlation_with_sales(max_temp_monthly_original, sales_df2, "max_temp")
+    # get_correlation_with_sales(min_temp_monthly_original, sales_df2, "min_temp")
     get_correlation_with_sales(rainfall_monthly_original, sales_df2, "rainfall")
