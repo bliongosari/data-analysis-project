@@ -1,5 +1,6 @@
 # COMP2003 Assignment2
 
+Note: full commits on : https://github.com/bliongosari/data-analysis-project
 Data used: 
 - monthly_max_temp.csv
 - monthly_min_temp.csv
